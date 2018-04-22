@@ -42,12 +42,7 @@ func (r *AddCopyright) Run(config *refactoring.Config) *refactoring.Result {
 
 	extent := r.findInComments("Copyright")
 	if extent != nil {
-		file := r.Program.Fset.File(r.File.Package)
-		startPos := file.Pos(extent.Offset)
-		endPos := file.Pos(extent.OffsetPastEnd())
-
-		r.Log.Error("An existing copyright was found.")
-		r.Log.AssociatePos(startPos, endPos)
+		r.logError(*extent, "An existing copyright was found.")
 		return &r.Result
 	}
 
@@ -62,6 +57,15 @@ func (r *AddCopyright) findInComments(text string) *text.Extent {
 		return nil
 	}
 	return occurrences[0]
+}
+
+func (r *AddCopyright) logError(extent text.Extent, text string) {
+	file := r.Program.Fset.File(r.File.Package)
+	startPos := file.Pos(extent.Offset)
+	endPos := file.Pos(extent.OffsetPastEnd())
+
+	r.Log.Error(text)
+	r.Log.AssociatePos(startPos, endPos)
 }
 
 func (r *AddCopyright) addCopyright(name string) {
